@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
-class LevelController extends Controller
+class LevelController1 extends Controller
 {
     public function updateLevel(Request $request)
     {
-        Log::info('Received data: ', $request->all());
+        // return response()->json($request->all());
+        // Log::info('Received data: ', $request->all());
 
         $request->validate([
             'user_id' => 'required|integer|exists:users,id',
@@ -33,7 +33,7 @@ class LevelController extends Controller
         $user->save();
 
         // Log hasil update
-        Log::info('Updated user: ', $user->toArray());
+        // Log::info('Updated user: ', $user->toArray());
 
         return response()->json([
             'status' => 'success',

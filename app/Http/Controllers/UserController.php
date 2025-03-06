@@ -29,9 +29,32 @@ class UserController extends Controller
             ]);
         }
     }
-    public function updateLevel(Request $request){
-        return response()->json([
-            'data'=> $request->all(),
+    public function updateLevel(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id', // Pastikan user_id valid
+            'level_id' => 'required|integer|exists:levels,id', // Pastikan level_id valid
         ]);
+
+        // Cari user berdasarkan user_id
+        $user = User::find($request->user_id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // Update level_id
+        $user->level_id = $request->level_id;
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Level updated successfully',
+            'user' => $user,
+        ], 200);
     }
 }

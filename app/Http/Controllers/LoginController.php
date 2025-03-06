@@ -17,13 +17,16 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // return response()->json([
-        //     'data' => $user
-        // ]);
         if ($user) {
             return response()->json([
                 'status' => 'success',
-                'user' => $user
+                'user' => [
+                    'id' => $user->id,
+                    'fullname' => $user->fullname,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'level_id' => $user->level_id,
+                ]
             ], 200);
         } else {
             return response()->json([

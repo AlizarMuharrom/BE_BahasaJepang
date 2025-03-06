@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\LevelController1;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LevelController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +22,6 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::post('/register',  [UserController::class, 'store']);
+Route::post('/register', [UserController::class, 'store']);
 Route::post('/login', [LoginController::class, 'prosesLogin']);
-Route::post('/level', [UserController::class, 'updateLevel']);
+Route::post('/update-level', [LevelController1::class, 'updateLevel']);
