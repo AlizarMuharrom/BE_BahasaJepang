@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\LevelController1;
+use App\Http\Controllers\KamusController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LevelController;
@@ -25,3 +26,5 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [UserController::class, 'store']);
 Route::post('/login', [LoginController::class, 'prosesLogin']);
 Route::post('/update-level', [LevelController1::class, 'updateLevel']);
+
+Route::apiResource('kamuses', KamusController::class);
