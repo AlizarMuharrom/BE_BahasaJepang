@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             LevelSeeder::class,
             UserSeeder::class,
             KamusSeeder::class,
+            KanjiSeeder::class,
         ]);
     }
 }
