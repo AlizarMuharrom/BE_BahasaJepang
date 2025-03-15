@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kamuses', function (Blueprint $table) {
+        Schema::create('detail_kamuses', function (Blueprint $table) {
             $table->id();
-            $table->string('judul');
-            $table->string('nama');
-            $table->string('baca');
+            $table->foreignId('kamus_id')->constrained()->onDelete('cascade');
+            $table->string('kanji');
+            $table->string('arti');
+            $table->string('voice_record');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kamuses');
+        Schema::dropIfExists('detail_kamuses');
     }
 };

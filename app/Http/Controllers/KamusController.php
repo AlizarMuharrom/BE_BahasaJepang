@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kamus;
+use App\Models\DetailKamus;
 use Illuminate\Http\Request;
 
 class KamusController extends Controller
@@ -12,7 +13,8 @@ class KamusController extends Controller
      */
     public function index()
     {
-        $kamuses = Kamus::all();
+        // Ambil semua data kamus beserta detail_kamuses
+        $kamuses = Kamus::with('detailKamuses')->get();
         return response()->json($kamuses);
     }
 
@@ -29,14 +31,28 @@ class KamusController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
             'judul' => 'required|string',
             'nama' => 'required|string',
             'baca' => 'required|string',
-            'contoh_penggunaan' => 'required|json',
         ]);
 
-        $kamus = Kamus::create($request->all());
+        // Simpan data kamus
+        $kamus = Kamus::create($request->only(['judul', 'nama', 'baca']));
+
+        // Jika ada data detail_kamuses, simpan juga
+        if ($request->has('detail_kamuses')) {
+            foreach ($request->detail_kamuses as $detail) {
+                DetailKamus::create([
+                    'kamus_id' => $kamus->id,
+                    'kanji' => $detail['kanji'],
+                    'arti' => $detail['arti'],
+                    'voice_record' => $detail['voice_record'],
+                ]);
+            }
+        }
+
         return response()->json($kamus, 201);
     }
 
@@ -45,12 +61,7 @@ class KamusController extends Controller
      */
     public function show($id)
     {
-        $kamus = Kamus::findOrFail($id);
-
-        if (is_string($kamus->contoh_penggunaan)) {
-            $kamus->contoh_penggunaan = json_decode($kamus->contoh_penggunaan, true);
-        }
-
+        $kamus = Kamus::with('detailKamuses')->findOrFail($id);
         return response()->json($kamus);
     }
 
@@ -67,14 +78,32 @@ class KamusController extends Controller
      */
     public function update(Request $request, Kamus $kamus)
     {
+        // Validasi input
         $request->validate([
             'judul' => 'sometimes|required|string',
             'nama' => 'sometimes|required|string',
             'baca' => 'sometimes|required|string',
-            'contoh_penggunaan' => 'sometimes|required|json',
         ]);
 
-        $kamus->update($request->all());
+        // Perbarui data kamus
+        $kamus->update($request->only(['judul', 'nama', 'baca']));
+
+        // Jika ada data detail_kamuses, perbarui juga
+        if ($request->has('detail_kamuses')) {
+            // Hapus detail_kamuses yang lama
+            $kamus->detailKamuses()->delete();
+
+            // Simpan detail_kamuses yang baru
+            foreach ($request->detail_kamuses as $detail) {
+                DetailKamus::create([
+                    'kamus_id' => $kamus->id,
+                    'kanji' => $detail['kanji'],
+                    'arti' => $detail['arti'],
+                    'voice_record' => $detail['voice_record'],
+                ]);
+            }
+        }
+
         return response()->json($kamus, 200);
     }
 
@@ -83,6 +112,7 @@ class KamusController extends Controller
      */
     public function destroy(Kamus $kamus)
     {
+        // Hapus data kamus beserta detail_kamuses (karena ada onDelete cascade)
         $kamus->delete();
         return response()->json(null, 204);
     }

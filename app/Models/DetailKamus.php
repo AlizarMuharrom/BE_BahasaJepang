@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Kamus extends Model
+class DetailKamus extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'judul',
-        'nama',
-        'baca',
+        'kamus_id',
+        'kanji',
+        'arti',
+        'voice_record',
     ];
 
-    public function detailKamuses()
+    public function kamus()
     {
-        return $this->hasMany(DetailKamus::class, 'kamus_id');
+        return $this->belongsTo(Kamus::class, 'kamus_id');
     }
 }
