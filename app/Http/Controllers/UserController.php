@@ -29,15 +29,45 @@ class UserController extends Controller
             ]);
         }
     }
-    public function updateLevel(Request $request)
+
+    public function updateProfile(Request $request, $id)
     {
         // Validasi input
         $request->validate([
-            'user_id' => 'required|integer|exists:users,id', // Pastikan user_id valid
-            'level_id' => 'required|integer|exists:levels,id', // Pastikan level_id valid
+            'username' => 'required|string|max:255',
+            'password' => 'nullable|string|min:6',
         ]);
 
-        // Cari user berdasarkan user_id
+        // Cari user berdasarkan ID
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // Update data user
+        $user->username = $request->username;
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Profile updated successfully',
+            'user' => $user,
+        ], 200);
+    }
+    public function updateLevel(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'level_id' => 'required|integer|exists:levels,id',
+        ]);
+
         $user = User::find($request->user_id);
 
         if (!$user) {
@@ -47,7 +77,6 @@ class UserController extends Controller
             ], 404);
         }
 
-        // Update level_id
         $user->level_id = $request->level_id;
         $user->save();
 

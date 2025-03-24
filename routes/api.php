@@ -27,5 +27,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [UserController::class, 'store']);
 Route::post('/login', [LoginController::class, 'prosesLogin']);
 Route::post('/update-level', [LevelController1::class, 'updateLevel']);
+
 Route::apiResource('kanji', KanjiController::class);
 Route::apiResource('kamuses', KamusController::class);
+
+Route::put('/update-profile/{id}', [UserController::class, 'updateProfile']);
