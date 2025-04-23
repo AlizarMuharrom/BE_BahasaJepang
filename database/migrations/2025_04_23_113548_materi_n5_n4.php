@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kanjis', function (Blueprint $table) {
+        Schema::create('materi_n5_n4', function (Blueprint $table) {
             $table->id();
-            $table->enum('kategori', ['tandoku', 'okurigana', 'jukugo']);
             $table->string('judul');
-            $table->string('nama');
-            $table->string('kunyomi');
-            $table->string('onyomi');
-            $table->string('voice_record');
             $table->timestamps();
         });
     }
@@ -28,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kanjis');
+        //
     }
 };

@@ -11,7 +11,6 @@ class KanjiSeeder extends Seeder
 {
     public function run()
     {
-        // Data untuk tabel kanji
         $kanji1 = Kanji::create([
             'kategori' => 'tandoku',
             'judul' => '母',

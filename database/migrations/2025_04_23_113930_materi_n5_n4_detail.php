@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kanjis', function (Blueprint $table) {
+        Schema::create('materi_n5_n4_detail', function (Blueprint $table) {
             $table->id();
-            $table->enum('kategori', ['tandoku', 'okurigana', 'jukugo']);
+            $table->foreignId('materi_n5_n4_id')->constrained()->onDelete('cascade');
             $table->string('judul');
-            $table->string('nama');
-            $table->string('kunyomi');
-            $table->string('onyomi');
-            $table->string('voice_record');
+            $table->string('isi');
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kanjis');
+        //
     }
 };
