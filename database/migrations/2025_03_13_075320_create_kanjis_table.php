@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('kunyomi');
             $table->string('onyomi');
             $table->string('voice_record');
+            $table->foreignId('level_id')->constrained('levels');
             $table->timestamps();
         });
     }

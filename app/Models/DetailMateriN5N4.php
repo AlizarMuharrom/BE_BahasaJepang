@@ -10,15 +10,14 @@ class DetailMateriN5N4 extends Model
 {
     use HasFactory;
 
+    protected $table = 'materi_n5_n4_detail'; // Sesuaikan dengan nama tabel di migrasi
+
     protected $fillable = [
         'materi_n5_n4_id',
         'judul',
         'isi'
     ];
 
-    /**
-     * Get the materi that owns the MateriN5N4Detail
-     */
     public function materi(): BelongsTo
     {
         return $this->belongsTo(MateriN5N4::class, 'materi_n5_n4_id');

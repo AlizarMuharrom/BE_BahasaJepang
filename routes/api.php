@@ -5,6 +5,7 @@ use App\Http\Controllers\KamusController;
 use App\Http\Controllers\KanjiController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MateriController;
+use App\Http\Controllers\MateriN5N4Controller;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LevelController;
 use Illuminate\Http\Request;
@@ -32,5 +33,8 @@ Route::post('/update-level', [LevelController1::class, 'updateLevel']);
 Route::apiResource('kanji', KanjiController::class);
 Route::apiResource('kamuses', KamusController::class);
 Route::apiResource('materis', MateriController::class);
+Route::apiResource('materi', MateriN5N4Controller::class);
+
+Route::get('materi/level/{levelName}', [MateriN5N4Controller::class, 'getByLevel']);
 
 Route::put('/update-profile/{id}', [UserController::class, 'updateProfile']);

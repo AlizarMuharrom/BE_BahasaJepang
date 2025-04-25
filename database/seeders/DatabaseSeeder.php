@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             KamusSeeder::class,
             KanjiSeeder::class,
             MateriSeeder::class,
+            MateriN5N4Seeder::class,
         ]);
     }
 }

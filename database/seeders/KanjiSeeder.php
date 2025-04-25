@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Level;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Kanji;
 use App\Models\DetailKanji;
@@ -11,6 +12,9 @@ class KanjiSeeder extends Seeder
 {
     public function run()
     {
+        $levelN5 = Level::where('level_name', 'N5')->first();
+        $levelN4 = Level::where('level_name', 'N4')->first();
+
         $kanji1 = Kanji::create([
             'kategori' => 'tandoku',
             'judul' => '母',
@@ -18,6 +22,7 @@ class KanjiSeeder extends Seeder
             'kunyomi' => 'はは',
             'onyomi' => 'ぼ',
             'voice_record' => 'assets/voice/haha.mp3',
+            'level_id' => $levelN5->id,
         ]);
 
         DetailKanji::create([
@@ -43,6 +48,7 @@ class KanjiSeeder extends Seeder
             'kunyomi' => 'たべる',
             'onyomi' => 'しょく',
             'voice_record' => 'okurigana',
+            'level_id' => $levelN5->id,
         ]);
 
         DetailKanji::create([
@@ -60,6 +66,25 @@ class KanjiSeeder extends Seeder
             'kunyomi' => 'こう',
             'onyomi' => 'こう',
             'voice_record' => 'path/to/voice_学校.mp3',
+            'level_id' => $levelN5->id,
+        ]);
+
+        DetailKanji::create([
+            'kanji_id' => $kanji3->id,
+            'kanji' => '学校',
+            'romaji' => 'gakkou',
+            'arti' => 'Sekolah',
+            'voice_record' => 'path/to/voice_母国.mp3',
+        ]);
+
+        $kanji3 = Kanji::create([
+            'kategori' => 'jukugo',
+            'judul' => '校',
+            'nama' => 'Sekolah',
+            'kunyomi' => 'こう',
+            'onyomi' => 'こう',
+            'voice_record' => 'path/to/voice_学校.mp3',
+            'level_id' => $levelN4->id,
         ]);
 
         DetailKanji::create([

@@ -7,15 +7,22 @@ use Illuminate\Http\Request;
 
 class KanjiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kanji = Kanji::with('detailKanji')->get();
+        $query = Kanji::with(['detailKanji', 'level']);
+        
+        // Filter berdasarkan level jika ada parameter
+        if ($request->has('level_id')) {
+            $query->where('level_id', $request->level_id);
+        }
+        
+        $kanji = $query->get();
         return response()->json($kanji);
     }
 
     public function show($id)
     {
-        $kanji = Kanji::with('detailKanji')->findOrFail($id);
+        $kanji = Kanji::with(['detailKanji', 'level'])->findOrFail($id);
         return response()->json($kanji);
     }
 
