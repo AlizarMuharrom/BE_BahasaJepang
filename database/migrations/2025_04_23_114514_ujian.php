@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('level_id')->constrained()->onDelete('cascade');
             $table->string('judul');
+            $table->integer('jumlah_soal')->default(20); // Tambahkan jumlah soal default
             $table->timestamps();
         });
     }

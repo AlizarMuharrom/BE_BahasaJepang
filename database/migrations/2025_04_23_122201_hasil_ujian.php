@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('hasil_ujians', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('users_id')->constrained()->onDelete('cascade');
-            $table->foreignId('ujians_id')->constrained()->onDelete('cascade');
-            $table->string('score');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('ujian_id')->constrained()->onDelete('cascade');
+            $table->integer('jumlah_benar');
+            $table->decimal('score', 5, 2);
+            $table->json('detail_jawaban')->nullable();
             $table->timestamps();
         });
     }

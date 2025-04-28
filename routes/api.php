@@ -8,6 +8,7 @@ use App\Http\Controllers\MateriController;
 use App\Http\Controllers\MateriN5N4Controller;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LevelController;
+use App\Http\Controllers\UjianController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -36,5 +37,19 @@ Route::apiResource('materis', MateriController::class);
 Route::apiResource('materi', MateriN5N4Controller::class);
 
 Route::get('materi/level/{levelName}', [MateriN5N4Controller::class, 'getByLevel']);
-
 Route::put('/update-profile/{id}', [UserController::class, 'updateProfile']);
+
+// ====================
+// RUTE UNTUK SISTEM UJIAN
+// ====================
+
+// Daftar ujian berdasarkan level
+Route::get('ujian/level/{levelId}', [UjianController::class, 'index']);
+
+Route::get('ujian/{ujianId}/soal', [UjianController::class, 'getSoal'])->middleware('auth:sanctum');
+
+Route::post('ujian/{ujianId}/submit', [UjianController::class, 'submitUjian'])->middleware('auth:sanctum');
+
+Route::get('hasil-ujian/{hasilId}', [UjianController::class, 'getHasil'])->middleware('auth:sanctum');
+
+Route::get('user/hasil-ujian', [UjianController::class, 'userHistory'])->middleware('auth:sanctum');
