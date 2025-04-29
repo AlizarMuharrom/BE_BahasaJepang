@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             KanjiSeeder::class,
             MateriSeeder::class,
             MateriN5N4Seeder::class,
-            UjianSeeder::class,
+            UjianPemulaSeeder::class,
         ]);
     }
 }
