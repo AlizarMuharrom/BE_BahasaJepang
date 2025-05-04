@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('/register', [UserController::class, 'store']);
-Route::post('/login', [LoginController::class, 'prosesLogin']);
+Route::post('/login', [LoginController::class, 'prosesLogin'])->name('login');
 Route::post('/update-level', [LevelController1::class, 'updateLevel']);
 
 Route::apiResource('kanji', KanjiController::class);
@@ -52,5 +52,8 @@ Route::get('ujian/{ujianId}/soal', [UjianController::class, 'getSoal'])->middlew
 Route::post('ujian/{ujianId}/submit', [UjianController::class, 'submitUjian'])->middleware('auth:sanctum');
 
 Route::get('hasil-ujian/{hasilId}', [UjianController::class, 'getHasil'])->middleware('auth:sanctum');
+
+Route::get('hasil-ujian/user/{userId}', [UjianController::class, 'getHasilByUser'])
+    ->middleware('auth:sanctum');
 
 Route::get('user/hasil-ujian', [UjianController::class, 'userHistory'])->middleware('auth:sanctum');

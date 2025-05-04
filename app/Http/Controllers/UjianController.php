@@ -92,6 +92,27 @@ class UjianController extends Controller
         ]);
     }
 
+    // Di Controller
+    public function getHasilByUser($userId)
+    {
+        if (auth()->id() != $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access'
+            ], 403);
+        }
+
+        $hasilUjian = HasilUjian::with('ujian')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $hasilUjian
+        ]);
+    }
+
     // Mendapatkan hasil ujian user
     public function getHasil($hasilId)
     {
