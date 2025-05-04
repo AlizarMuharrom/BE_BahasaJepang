@@ -24,4 +24,9 @@ class Level extends Model
     {
         return $this->hasMany(Kanji::class);
     }
+
+    public function kamuses(): HasMany
+    {
+        return $this->hasMany(Kamus::class);
+    }
 }

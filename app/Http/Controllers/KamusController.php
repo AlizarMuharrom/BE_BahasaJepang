@@ -11,10 +11,16 @@ class KamusController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Ambil semua data kamus beserta detail_kamuses
-        $kamuses = Kamus::with('detailKamuses')->get();
+        $query = Kamus::with(['detailKamuses','level']);
+
+        if ($request->has('level_id')) {
+            $query->where('level_id', $request->level_id);
+        }
+        
+        $kamuses = $query->get();
         return response()->json($kamuses);
     }
 
@@ -39,7 +45,7 @@ class KamusController extends Controller
         ]);
 
         // Simpan data kamus
-        $kamus = Kamus::create($request->only(['judul', 'nama', 'baca']));
+        $kamus = Kamus::create($request->all());
 
         // Jika ada data detail_kamuses, simpan juga
         if ($request->has('detail_kamuses')) {
@@ -86,7 +92,7 @@ class KamusController extends Controller
         ]);
 
         // Perbarui data kamus
-        $kamus->update($request->only(['judul', 'nama', 'baca']));
+        $kamus->update($request->all());
 
         // Jika ada data detail_kamuses, perbarui juga
         if ($request->has('detail_kamuses')) {

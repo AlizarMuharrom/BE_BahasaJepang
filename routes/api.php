@@ -37,7 +37,8 @@ Route::apiResource('materis', MateriController::class);
 Route::apiResource('materi', MateriN5N4Controller::class);
 
 Route::get('materi/level/{levelName}', [MateriN5N4Controller::class, 'getByLevel']);
-Route::put('/update-profile/{id}', [UserController::class, 'updateProfile']);
+Route::put('/update-profile/{id}', [UserController::class, 'updateProfile'])
+    ->middleware('auth:sanctum');
 
 // ====================
 // RUTE UNTUK SISTEM UJIAN

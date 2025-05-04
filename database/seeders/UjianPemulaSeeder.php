@@ -33,29 +33,29 @@ class UjianPemulaSeeder extends Seeder
         $this->createQuestion(
             $ujianPemula->id,
             "Apa bunyi dari huruf あ?",
-            ['A' => 'a', 'B' => 'i', 'C' => 'u', 'D' => 'e'],
-            'A',
+            ['A' => 'n', 'B' => 'i', 'C' => 'a', 'D' => 'e'],
+            'C',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Apa bunyi dari huruf か?",
-            ['A' => 'ka', 'B' => 'ga', 'C' => 'ki', 'D' => 'ku'],
-            'A',
+            ['A' => 'ki', 'B' => 'ga', 'C' => 'ka', 'D' => 'ku'],
+            'C',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Manakah huruf untuk bunyi 'ni'?",
-            ['A' => 'に', 'B' => 'ぬ', 'C' => 'ね', 'D' => 'の'],
-            'A',
+            ['A' => 'の', 'B' => 'ぬ', 'C' => 'ね', 'D' => 'に'],
+            'D',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Apa arti dari 'みず'?",
-            ['A' => 'Air', 'B' => 'Api', 'C' => 'Angin', 'D' => 'Tanah'],
-            'A',
+            ['A' => 'Api', 'B' => 'Air', 'C' => 'Angin', 'D' => 'Tanah'],
+            'B',
         );
 
         $this->createQuestion(
@@ -76,29 +76,29 @@ class UjianPemulaSeeder extends Seeder
         $this->createQuestion(
             $ujianPemula->id,
             "Bagaimana mengatakan 'Terima kasih'?",
-            ['A' => 'ありがとう', 'B' => 'すみません', 'C' => 'ごめんなさい', 'D' => 'おはよう'],
-            'A',
+            ['A' => 'ごめんなさい', 'B' => 'すみません', 'C' => 'ありがとう', 'D' => 'おはよう'],
+            'C',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Apa respon untuk 'ありがとう'?",
-            ['A' => 'どういたしまして', 'B' => 'すみません', 'C' => 'はい', 'D' => 'いいえ'],
-            'A',
+            ['A' => 'すみません', 'B' => 'どういたしまして', 'C' => 'はい', 'D' => 'いいえ'],
+            'B',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Apa arti dari 'おなまえは?'",
-            ['A' => 'Siapa nama Anda?', 'B' => 'Anda tinggal dimana?', 'C' => 'Anda berapa usia?', 'D' => 'Apa kabar?'],
-            'A',
+            ['A' => 'Berapa usia Anda?', 'B' => 'Anda tinggal dimana?', 'C' => 'Siapa nama Anda?', 'D' => 'Apa kabar?'],
+            'C',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Bagaimana mengatakan 'Saya dari Indonesia'?",
-            ['A' => 'インドネシアからです', 'B' => 'インドネシアです', 'C' => 'インドネシアにいます', 'D' => 'インドネシアがすきです'],
-            'A',
+            ['A' => 'インドネシアがすきです', 'B' => 'インドネシアです', 'C' => 'インドネシアにいます', 'D' => 'インドネシアからです'],
+            'D',
         );
 
         // Soal 11-15: Angka dan Waktu
@@ -119,15 +119,15 @@ class UjianPemulaSeeder extends Seeder
         $this->createQuestion(
             $ujianPemula->id,
             "Manakah yang berarti 'hari ini'?",
-            ['A' => 'きょう', 'B' => 'あした', 'C' => 'きのう', 'D' => 'あさって'],
-            'A',
+            ['A' => 'あした', 'B' => 'きょう', 'C' => 'きのう', 'D' => 'あさって'],
+            'B',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Apa arti dari 'なんにんですか?'",
-            ['A' => 'Berapa orang?', 'B' => 'Siapa nama Anda?', 'C' => 'Berapa umur?', 'D' => 'Jam berapa?'],
-            'A',
+            ['A' => 'Siapa nama Anda?', 'B' => 'Berapa orang?', 'C' => 'Berapa umur?', 'D' => 'Jam berapa?'],
+            'B',
         );
 
         $this->createQuestion(
@@ -155,24 +155,30 @@ class UjianPemulaSeeder extends Seeder
         $this->createQuestion(
             $ujianPemula->id,
             "Apa arti dari 'のみもの'?",
-            ['A' => 'Minuman', 'B' => 'Makanan', 'C' => 'Camilan', 'D' => 'Buah'],
-            'A',
+            ['A' => 'Camilan', 'B' => 'Makanan', 'C' => 'Minuman', 'D' => 'Buah'],
+            'C',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Bagaimana mengatakan 'tolong' dalam bahasa Jepang?",
-            ['A' => 'おねがいします', 'B' => 'すみません', 'C' => 'ありがとう', 'D' => 'ごめんなさい'],
-            'A',
+            ['A' => 'ごめんなさい', 'B' => 'すみません', 'C' => 'ありがとう', 'D' => 'おねがいします'],
+            'D',
         );
 
         $this->createQuestion(
             $ujianPemula->id,
             "Apa arti dari 'だいじょうぶですか?'",
-            ['A' => 'Apakah Anda baik-baik saja?', 'B' => 'Siapa nama Anda?', 'C' => 'Anda lapar?', 'D' => 'Anda mengerti?'],
-            'A',
+            ['A' => 'Anda mengerti?', 'B' => 'Siapa nama Anda?', 'C' => 'Anda lapar?', 'D' => 'Apakah Anda baik-baik saja?'],
+            'D',
+        );
+
+        Level::updateOrCreate(
+            ['id' => 2],
+            ['level_name' => 'N5']
         );
     }
+
 
     private function createQuestion($ujianId, $soal, $pilihan, $jawabanBenar)
     {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Kamus extends Model
 {
@@ -13,10 +14,16 @@ class Kamus extends Model
         'judul',
         'nama',
         'baca',
+        'level_id',
     ];
 
     public function detailKamuses()
     {
         return $this->hasMany(DetailKamus::class, 'kamus_id');
+    }
+
+    public function level(): BelongsTo
+    {
+        return $this->belongsTo(Level::class);
     }
 }

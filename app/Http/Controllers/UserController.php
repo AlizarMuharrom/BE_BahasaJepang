@@ -32,34 +32,30 @@ class UserController extends Controller
 
     public function updateProfile(Request $request, $id)
     {
-        // Validasi input
-        $request->validate([
-            'username' => 'required|string|max:255',
+        $validated = $request->validate([
+            'username' => 'required|string|max:255|unique:users,username,' . $id,
             'password' => 'nullable|string|min:6',
         ]);
 
-        // Cari user berdasarkan ID
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
-        if (!$user) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-            ], 404);
+        $updateData = ['username' => $validated['username']];
+
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
         }
 
-        // Update data user
-        $user->username = $request->username;
-        if ($request->password) {
-            $user->password = Hash::make($request->password);
-        }
-        $user->save();
+        $user->update($updateData);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Profile updated successfully',
-            'user' => $user,
-        ], 200);
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email
+            ]
+        ]);
     }
     public function updateLevel(Request $request)
     {
