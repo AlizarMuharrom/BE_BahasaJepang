@@ -13,8 +13,8 @@ class Materi extends Model
         'judul'
     ];
 
-    public function detailMateris()
+    public function detail_materis()
     {
         return $this->hasMany(DetailMateri::class);
-    }
+}
 }

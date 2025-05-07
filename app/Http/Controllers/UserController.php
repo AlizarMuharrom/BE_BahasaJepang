@@ -82,4 +82,11 @@ class UserController extends Controller
             'user' => $user,
         ], 200);
     }
+
+    public function fetchUser()
+    {
+        $data = User::all();
+        return view('admin.user', compact('data'));
+    }
+
 }

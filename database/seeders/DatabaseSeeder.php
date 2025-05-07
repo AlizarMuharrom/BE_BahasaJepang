@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             MateriSeeder::class,
             MateriN5N4Seeder::class,
             UjianPemulaSeeder::class,
+            AdminSeeder::class,
         ]);
     }
 }
