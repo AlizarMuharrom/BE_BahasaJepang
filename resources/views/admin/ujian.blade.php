@@ -1,7 +1,6 @@
 @extends('layout.app')
 @section('content')
     <div class="container-fluid">
-
         <!-- Page Heading -->
         <h1 class="h3 mb-2 text-gray-800">Data Ujian</h1>
 
@@ -20,24 +19,44 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Id</th>
+                                <th>ID</th>
                                 <th>Judul</th>
-                                <th>Jumlah</th>
+                                <th>Level</th>
+                                <th>Jumlah Soal</th>
+                                <th>Detail Soal</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Id</th>
-                                <th>Judul</th>
-                                <th>Jumlah</th>
-                            </tr>
-                        </tfoot>
                         <tbody>
                             @foreach ($data as $d)
                                 <tr>
                                     <td>{{ $d->id }}</td>
                                     <td>{{ $d->judul }}</td>
+                                    <td>
+                                        @switch($d->level_id)
+                                            @case(1) Pemula @break
+                                            @case(2) N5 @break
+                                            @case(3) N4 @break
+                                            @default Unknown
+                                        @endswitch
+                                    </td>
                                     <td>{{ $d->jumlah_soal }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" data-toggle="modal" 
+                                                data-target="#detailModal{{ $d->id }}">
+                                            <i class="fas fa-eye"></i> Lihat Soal
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" data-toggle="modal"
+                                                data-target="#editModal{{ $d->id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                                data-target="#deleteModal{{ $d->id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -45,6 +64,127 @@
                 </div>
             </div>
         </div>
-
     </div>
+
+    <!-- Semua modal ditempatkan di luar tabel -->
+    @foreach ($data as $d)
+        <!-- Modal Detail Soal -->
+        <div class="modal fade" id="detailModal{{ $d->id }}" tabindex="-1" role="dialog"
+             aria-labelledby="detailModalLabel{{ $d->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailModalLabel{{ $d->id }}">
+                            Detail Soal - {{ $d->judul }}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Soal</th>
+                                        <th>Pilihan Jawaban</th>
+                                        <th>Jawaban Benar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($d->questions as $index => $question)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $question->soal }}</td>
+                                        <td>
+                                            <ul class="list-unstyled">
+                                                @foreach(json_decode($question->pilihan_jawaban, true) as $key => $value)
+                                                <li><strong>{{ $key }}:</strong> {{ $value }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                        <td class="text-success font-weight-bold">{{ $question->jawaban_benar }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Edit -->
+        <div class="modal fade" id="editModal{{ $d->id }}" tabindex="-1" role="dialog"
+             aria-labelledby="editModalLabel{{ $d->id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form action="{{ route('ujianUpdate', $d->id) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel{{ $d->id }}">Edit Data Ujian</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Judul Ujian</label>
+                                <input type="text" name="judul" class="form-control"
+                                    value="{{ $d->judul }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Jumlah Soal</label>
+                                <input type="number" name="jumlah_soal" class="form-control"
+                                    value="{{ $d->jumlah_soal }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Level</label>
+                                <select name="level_id" class="form-control" required>
+                                    <option value="1" {{ $d->level_id == 1 ? 'selected' : '' }}>Pemula</option>
+                                    <option value="2" {{ $d->level_id == 2 ? 'selected' : '' }}>N5</option>
+                                    <option value="3" {{ $d->level_id == 3 ? 'selected' : '' }}>N4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Delete -->
+        <div class="modal fade" id="deleteModal{{ $d->id }}" tabindex="-1" role="dialog"
+             aria-labelledby="deleteModalLabel{{ $d->id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <form action="{{ route('ujianDelete', $d->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel{{ $d->id }}">Konfirmasi Hapus</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Yakin ingin menghapus data ujian <strong>{{ $d->judul }}</strong>?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger">Hapus</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
 @endsection

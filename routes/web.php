@@ -22,5 +22,11 @@ Route::delete('/kanji/{id}', [AdminController::class, 'kanjiDelete'])->name('kan
 Route::POST('/kamusStore', [AdminController::class, 'kamusStore'])->name('kamusStore');
 Route::PATCH('/kamusUpdate/{id}', [AdminController::class, 'kamusUpdate'])->name('kamusUpdate');
 Route::delete('/kamusDelete/{id}', [AdminController::class, 'kamusDelete'])->name('kamusDelete');
+Route::POST('/ujianStore', [AdminController::class, 'ujianStore'])->name('ujianStore');
+Route::PATCH('/ujianUpdate/{id}', [AdminController::class, 'ujianUpdate'])->name('ujianUpdate');
+Route::delete('/ujianDelete/{id}', [AdminController::class, 'ujianDelete'])->name('ujianDelete');
+Route::POST('/materiStore', [AdminController::class, 'materiStore'])->name('materiStore');
+Route::PATCH('/materiUpdate/{id}', [AdminController::class, 'materiUpdate'])->name('materiUpdate');
+Route::delete('/materiDelete/{id}', [AdminController::class, 'materiDelete'])->name('materiDelete');
 
 

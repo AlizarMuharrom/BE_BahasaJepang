@@ -2,12 +2,12 @@
 
 @section('content')
     <div class="container mt-4">
-        <a href="{{ route('kamus') }}" class="btn btn-outline-secondary mb-3">
+        <a href="{{ route('ujian') }}" class="btn btn-outline-secondary mb-3">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
         <h2 class="mb-4">Tambah Ujian</h2>
 
-        <form action="" method="POST">
+        <form action="{{ route('ujianStore') }}" method="POST">
             @csrf
 
             <!-- Pilih Level -->
@@ -41,19 +41,19 @@
                 <div class="soal-item border rounded p-3 mb-3">
                     <div class="mb-2">
                         <label class="form-label">Pertanyaan</label>
-                        <input type="text" name="soal[0][pertanyaan]" class="form-control" required>
+                        <input type="text" name="soal[0][soal]" class="form-control" required>
                     </div>
                     <div class="row">
                         @foreach (['A', 'B', 'C', 'D'] as $opt)
                             <div class="col-md-6 mb-2">
                                 <label class="form-label">Pilihan {{ $opt }}</label>
-                                <input type="text" name="soal[0][pilihan][{{ $opt }}]" class="form-control" required>
+                                <input type="text" name="soal[0][pilihan_jawaban][{{ $opt }}]" class="form-control" required>
                             </div>
                         @endforeach
                     </div>
                     <div class="form-group">
-                        <label for="level_id">Jawaban Benar</label>
-                        <select name="level_id" class="form-control" required>
+                        <label>Jawaban Benar</label>
+                        <select name="soal[0][jawaban_benar]" class="form-control" required>
                             <option value="" selected disabled>-- Pilih Jawaban Benar --</option>
                             <option value="A">A</option>
                             <option value="B">B</option>
@@ -61,16 +61,6 @@
                             <option value="D">D</option>
                         </select>
                     </div>
-                    <!-- <div class="mb-2">
-                                <label class="form-label">Jawaban Benar</label>
-                                <select name="soal[0][jawaban]" class="form-select" required>
-                                    <option value="" selected disabled>-- Pilih Jawaban Benar --</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                </select>
-                            </div> -->
                 </div>
             </div>
 
@@ -85,35 +75,36 @@
     <script>
         let soalIndex = 1;
 
-        document.getElementById('tambah-soal').addEventListener('click', function () {
+        document.getElementById('add-detail').addEventListener('click', function () {
             const container = document.getElementById('soal-container');
 
             const soalHTML = `
-                                                    <div class="soal-item border rounded p-3 mb-3">
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Pertanyaan</label>
-                                                            <input type="text" name="soal[${soalIndex}][pertanyaan]" class="form-control" required>
-                                                        </div>
-                                                        <div class="row">
-                                                            ${['A', 'B', 'C', 'D'].map(opt => `
-                                                                <div class="col-md-6 mb-2">
-                                                                    <label class="form-label">Pilihan ${opt}</label>
-                                                                    <input type="text" name="soal[${soalIndex}][pilihan][${opt}]" class="form-control" required>
+                                                            <div class="soal-item border rounded p-3 mb-3">
+                                                                <div class="mb-2">
+                                                                    <label class="form-label">Pertanyaan</label>
+                                                                    <input type="text" name="soal[${soalIndex}][soal]" class="form-control" required>
                                                                 </div>
-                                                            `).join('')}
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Jawaban Benar</label>
-                                                            <select name="soal[${soalIndex}][jawaban]" class="form-select" required>
-                                                                <option value="">-- Pilih Jawaban Benar --</option>
-                                                                <option value="A">A</option>
-                                                                <option value="B">B</option>
-                                                                <option value="C">C</option>
-                                                                <option value="D">D</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    `;
+                                                                <div class="row">
+                                                                    ${['A', 'B', 'C', 'D'].map(opt => `
+                                                                        <div class="col-md-6 mb-2">
+                                                                            <label class="form-label">Pilihan ${opt}</label>
+                                                                            <input type="text" name="soal[${soalIndex}][pilihan_jawaban][${opt}]" class="form-control" required>
+                                                                        </div>
+                                                                    `).join('')}
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="jawaban_benar">Jawaban Benar</label>
+                                                                    <select name="soal[${soalIndex}][jawaban_benar]" class="form-control" required>
+                                                                        <option value="" selected disabled>-- Pilih Jawaban Benar --</option>
+                                                                        <option value="A">A</option>
+                                                                        <option value="B">B</option>
+                                                                        <option value="C">C</option>
+                                                                        <option value="D">D</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        `;
+
 
             container.insertAdjacentHTML('beforeend', soalHTML);
             soalIndex++;

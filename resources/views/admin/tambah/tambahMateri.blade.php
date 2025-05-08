@@ -7,7 +7,7 @@
         </a>
         <h1 class="h3 mb-4 text-gray-800">Tambah Materi</h1>
 
-        <form action="" method="POST">
+        <form action="{{ route('materiStore') }}" method="POST">
             @csrf
 
             <!-- Judul Materi -->

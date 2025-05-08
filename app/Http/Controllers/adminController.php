@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailKamus;
 use App\Models\DetailKanji;
+use App\Models\DetailMateri;
+use App\Models\DetailUjian;
 use App\Models\Kamus;
 use App\Models\Kanji;
 use App\Models\Level;
@@ -29,6 +31,102 @@ class adminController extends Controller
     public function tambahMateri()
     {
         return view('admin.tambah.tambahMateri');
+    }
+
+    public function materiStore(Request $request)
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'judul_materi' => 'required|string|max:255',
+            'judul_detail' => 'required|array|min:1',
+            'judul_detail.*' => 'required|string|max:255',
+            'isi_detail' => 'required|array|min:1',
+            'isi_detail.*' => 'required|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Simpan data materi utama
+            $materi = Materi::create([
+                'judul' => $validated['judul_materi']
+            ]);
+
+            // Simpan detail materi
+            foreach ($validated['judul_detail'] as $index => $judul) {
+                DetailMateri::create([
+                    'materi_id' => $materi->id,
+                    'judul' => $judul,
+                    'isi' => $validated['isi_detail'][$index]
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('materi')->with('success', 'Materi berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menyimpan materi: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    // In your AdminController.php
+
+    public function materiUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'detail_judul.*' => 'required|string|max:255',
+            'detail_isi.*' => 'required|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Update main materi
+            $materi = Materi::findOrFail($id);
+            $materi->update([
+                'judul' => $request->judul
+            ]);
+
+            // Update detail materi
+            foreach ($request->detail_judul as $detailId => $judul) {
+                $detail = DetailMateri::findOrFail($detailId);
+                $detail->update([
+                    'judul' => $judul,
+                    'isi' => $request->detail_isi[$detailId]
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Materi berhasil diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memperbarui materi: ' . $e->getMessage());
+        }
+    }
+
+    public function materiDelete($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $materi = Materi::findOrFail($id);
+
+            // Delete detail materi first to maintain referential integrity
+            $materi->detail_materis()->delete();
+
+            // Then delete the main materi
+            $materi->delete();
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Materi berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus materi: ' . $e->getMessage());
+        }
     }
 
     public function kamus()
@@ -116,10 +214,8 @@ class adminController extends Controller
             // Temukan data kamus yang akan dihapus
             $kamus = Kamus::findOrFail($id);
 
-            // Hapus terlebih dahulu detail kamus yang terkait
             $kamus->detailKamuses()->delete();
 
-            // Hapus data kamus utama
             $kamus->delete();
 
             return redirect()->route('kamus')->with('success', 'Data kamus berhasil dihapus.');
@@ -229,14 +325,125 @@ class adminController extends Controller
 
     public function ujian()
     {
-        $data = Ujian::all();
+        // Ambil data ujian beserta relasi questions (detail ujian)
+        $data = Ujian::with('questions')->get();
+
         return view('admin.ujian', compact('data'));
     }
+
 
     public function tambahUjian()
     {
         return view('admin.tambah.tambahUjian');
     }
+
+    public function ujianStore(Request $request)
+    {
+        // Debug data input
+        // dd($request->all());
+
+        // Validasi input
+        $validatedData = $request->validate([
+            'level_id' => 'required|string|in:pemula,n5,n4',
+            'judul' => 'required|string|max:255',
+            'jumlah_soal' => 'required|integer|min:1',
+            'soal' => 'required|array|min:1',
+            'soal.*.soal' => 'required|string',
+            'soal.*.pilihan_jawaban' => 'required|array',
+            'soal.*.pilihan_jawaban.A' => 'required|string',
+            'soal.*.pilihan_jawaban.B' => 'required|string',
+            'soal.*.pilihan_jawaban.C' => 'required|string',
+            'soal.*.pilihan_jawaban.D' => 'required|string',
+            'soal.*.jawaban_benar' => 'required|in:A,B,C,D',
+        ]);
+
+        // Mapping level
+        $levelMap = [
+            'pemula' => 1,
+            'n5' => 2,
+            'n4' => 3
+        ];
+
+        DB::beginTransaction();
+        try {
+            // Buat ujian baru
+            $ujian = Ujian::create([
+                'level_id' => $levelMap[$validatedData['level_id']],
+                'judul' => $validatedData['judul'],
+                'jumlah_soal' => $validatedData['jumlah_soal']
+            ]);
+
+            // Simpan soal-soal
+            foreach ($validatedData['soal'] as $soal) {
+                DetailUjian::create([
+                    'ujian_id' => $ujian->id,
+                    'soal' => $soal['soal'],
+                    'pilihan_jawaban' => json_encode($soal['pilihan_jawaban']),
+                    'jawaban_benar' => $soal['jawaban_benar']
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('ujian')->with('success', 'Ujian berhasil dibuat!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal membuat ujian: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function ujianUpdate(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'jumlah_soal' => 'required|integer|min:1',
+            'level_id' => 'required|integer|in:1,2,3' // 1=Pemula, 2=N5, 3=N4
+        ]);
+
+        try {
+            // Temukan data ujian yang akan diupdate
+            $ujian = Ujian::findOrFail($id);
+
+            // Update data ujian
+            $ujian->update([
+                'judul' => $request->judul,
+                'jumlah_soal' => $request->jumlah_soal,
+                'level_id' => $request->level_id
+            ]);
+
+            return redirect()->route('ujian')->with('success', 'Data ujian berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal memperbarui data ujian: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function ujianDelete($id)
+    {
+        DB::beginTransaction();
+        try {
+            $ujian = Ujian::with(['questions', 'results'])->findOrFail($id);
+
+            $ujian->questions()->delete();
+            $ujian->results()->delete();
+
+            $ujian->delete();
+
+            DB::commit();
+
+            return redirect()->route('ujian')->with('success', 'Data ujian berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus data ujian: ' . $e->getMessage());
+        }
+    }
+
     public function user()
     {
         $data = User::all();
