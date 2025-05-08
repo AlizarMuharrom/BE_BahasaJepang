@@ -13,6 +13,14 @@ class DetailKanji extends Model
         'id',
         'kanji_id',
     ];
+
+    protected $fillable = [
+        'kanji_id',
+        'kanji',
+        'arti',
+        'romaji',
+        'voice_record'
+    ];
     public function kanji()
     {
         return $this->belongsTo(Kanji::class, 'kanji_id');

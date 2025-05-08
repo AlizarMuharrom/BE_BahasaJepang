@@ -7,7 +7,7 @@
         </a>
         <h3 class="mb-4">Tambah Data Kamus</h3>
 
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('kamusStore') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="form-group">
@@ -28,7 +28,9 @@
             <div class="form-group">
                 <label for="level_id">Level</label>
                 <select name="level_id" class="form-control" required>
-                    <option value=""></option>
+                    <option value="" selected disabled>-- Pilih Level --</option>
+                    <option value="N5">N5</option>
+                    <option value="N4">N4</option>
                 </select>
             </div>
 

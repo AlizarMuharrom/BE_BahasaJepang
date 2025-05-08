@@ -16,3 +16,11 @@ Route::get('/tambahMateri', [AdminController::class, 'tambahMateri'])->name('tam
 Route::get('/tambahKanji', [AdminController::class, 'tambahKanji'])->name('tambahKanji');
 Route::get('/tambahKamus', [AdminController::class, 'tambahKamus'])->name('tambahKamus');
 Route::get('/tambahUjian', [AdminController::class, 'tambahUjian'])->name('tambahUjian');
+Route::POST('/kanjiStore', [AdminController::class, 'kanjiStore'])->name('kanjiStore');
+Route::PATCH('/kanji/{id}', [AdminController::class, 'kanjiUpdate'])->name('kanjiUpdate');
+Route::delete('/kanji/{id}', [AdminController::class, 'kanjiDelete'])->name('kanjiDelete');
+Route::POST('/kamusStore', [AdminController::class, 'kamusStore'])->name('kamusStore');
+Route::PATCH('/kamusUpdate/{id}', [AdminController::class, 'kamusUpdate'])->name('kamusUpdate');
+Route::delete('/kamusDelete/{id}', [AdminController::class, 'kamusDelete'])->name('kamusDelete');
+
+
