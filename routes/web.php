@@ -6,7 +6,10 @@ use App\Http\Controllers\AdminController;
 // use App\Http\Controllers\UserController;
 
 // Route untuk halaman utama ("/")
-Route::get('/', [AdminController::class, 'home'])->name('dashboard');
+Route::get('/', [AdminController::class, 'index'])->name('login');
+Route::POST('/login', [AdminController::class, 'login'])->name('loginProses');
+Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+Route::get('/dashboard', [AdminController::class, 'home'])->name('dashboard');
 Route::get('/materi', [AdminController::class, 'materi'])->name('materi');
 Route::get('/kamus', [AdminController::class, 'kamus'])->name('kamus');
 Route::get('/kanji', [AdminController::class, 'kanji'])->name('kanji');

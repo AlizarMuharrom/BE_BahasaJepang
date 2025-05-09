@@ -77,9 +77,14 @@
         Akun
     </div>
     <li class="nav-item">
-        <a class="nav-link" href="tables.html">
-            <i class="fas fa-fw fa-sign-out-alt"></i>
-            <span>Logout</span></a>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST">
+            @csrf
+            <a class="nav-link" href="#"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="fas fa-fw fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </form>
     </li>
 
     <!-- Sidebar Toggler (Sidebar) -->
