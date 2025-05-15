@@ -4,10 +4,38 @@
         <!-- Page Heading -->
         <h1 class="h3 mb-2 text-gray-800">Data Materi</h1>
 
+        @if(session('success_adding'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Sukses!</strong> {{ session('success_adding') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if(session('success_update'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Sukses!</strong> {{ session('success_update') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if(session('success_delete'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Sukses!</strong> {{ session('success_delete') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
         <!-- Tombol Tambah Data -->
         <a href="{{ route('tambahMateri') }}" class="btn btn-primary mb-3">
             <i class="fas fa-plus"></i> Tambah Data
         </a>
+        <!-- Rest of your content -->
 
         <!-- DataTables Example -->
         <div class="card shadow mb-4">
@@ -143,3 +171,22 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function () {
+            // Check for success messages and show alerts
+            @if(session('success_adding'))
+                alert('{{ session('success_adding') }}');
+            @endif
+            
+            @if(session('success_update'))
+                alert('{{ session('success_update') }}');
+            @endif
+            
+            @if(session('success_delete'))
+                alert('{{ session('success_delete') }}');
+            @endif
+        });
+    </script>
+@endpush

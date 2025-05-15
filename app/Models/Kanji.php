@@ -14,6 +14,16 @@ class Kanji extends Model
         'id',
     ];
 
+    protected $fillable = [
+        'kategori',
+        'judul',
+        'nama',
+        'kunyomi',
+        'onyomi',
+        'voice_record',
+        'level_id'
+    ];
+
     public function detailKanji()
     {
         return $this->hasMany(DetailKanji::class, 'kanji_id');

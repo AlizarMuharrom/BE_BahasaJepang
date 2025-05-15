@@ -20,6 +20,12 @@
     <!-- Custom styles for this template-->
     <link href="{{ asset('assetAdmin/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assetAdmin/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Di bagian head -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- Sebelum penutup body -->
+
 
 </head>
 
@@ -97,6 +103,7 @@
 
     <!-- Page level custom scripts -->
     <script src="{{ asset('assetAdmin/js/demo/datatables-demo.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>
 

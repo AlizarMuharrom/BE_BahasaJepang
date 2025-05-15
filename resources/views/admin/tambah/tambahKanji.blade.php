@@ -49,8 +49,8 @@
                 <label for="level_id">Level</label>
                 <select name="level_id" class="form-control" required>
                     <option value="" selected disabled>-- Pilih Level --</option>
-                    <option value="1">N5</option>
-                    <option value="2">N4</option>
+                    <option value="2">N5</option>
+                    <option value="3">N4</option>
                 </select>
             </div>
 

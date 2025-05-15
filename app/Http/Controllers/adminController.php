@@ -12,6 +12,7 @@ use App\Models\Level;
 use App\Models\Materi;
 use App\Models\Ujian;
 use App\Models\User;
+use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ class adminController extends Controller
         return view('admin.index');
     }
 
+
     public function login(Request $request)
     {
         $request->validate([
@@ -31,12 +33,17 @@ class adminController extends Controller
             'password' => 'required'
         ]);
 
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            return redirect()->route('dashboard');
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            $user = Auth::user();
+            if ($user->role == 'admin') {
+                return redirect()->route('dashboard');
+            } else {
+                Auth::logout();
+                return redirect()->route('login')->with('not_admin', 'Akun bukan role admin!');
+            }
         }
 
+        // Jika autentikasi gagal
         return redirect()->route('login')->with('failed', 'Email atau Password salah!');
     }
 
@@ -51,7 +58,11 @@ class adminController extends Controller
     }
     public function home()
     {
-        return view('admin.dashboard');
+        $jumlahUser = User::count();
+        $jumlahKanji = Kanji::count();
+        $jumlahKamus = Kamus::count();
+
+        return view('admin.dashboard', compact('jumlahUser', 'jumlahKanji', 'jumlahKamus'));
     }
     public function materi()
     {
@@ -93,7 +104,7 @@ class adminController extends Controller
 
             DB::commit();
 
-            return redirect()->route('materi')->with('success', 'Materi berhasil disimpan!');
+            return redirect()->route('materi')->with('success_adding', 'Materi berhasil disimpan!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -131,7 +142,7 @@ class adminController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Materi berhasil diperbarui');
+            return redirect()->route('materi')->with('success_update', 'Materi berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal memperbarui materi: ' . $e->getMessage());
@@ -153,7 +164,7 @@ class adminController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Materi berhasil dihapus');
+            return redirect()->route('materi')->with('success_delete', 'Materi berhasil dihapus!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menghapus materi: ' . $e->getMessage());
@@ -162,8 +173,9 @@ class adminController extends Controller
 
     public function kamus()
     {
-        $data = Kamus::all();
-        return view('admin.kamus', compact('data'));
+        $data = Kamus::with(['detailKamuses', 'level'])->get();
+        $levels = Level::all();
+        return view('admin.kamus', compact('data', 'levels'));
     }
 
     public function tambahKamus()
@@ -173,70 +185,129 @@ class adminController extends Controller
 
     public function kamusStore(Request $request)
     {
-        // Validasi input (optional, tapi disarankan)
-        $request->validate([
-            'judul' => 'required|string',
-            'nama' => 'required|string',
-            'baca' => 'required|string',
-            'level_id' => 'required|string',
-            'detail_kanji' => 'required|array',
-            'detail_arti' => 'required|array',
-            'detail_voice' => 'required|array',
-            'detail_kanji.*' => 'required|string',
-            'detail_arti.*' => 'required|string',
-            'detail_voice.*' => 'required|file|mimes:audio/*',
+        // Add proper validation
+        $validated = $request->validate([
+            'judul' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
+            'baca' => 'required|string|max:255',
+            'level_id' => 'required|string|in:N5,N4', // Ensure only these values
+            'detail_kanji' => 'required|array|min:1',
+            'detail_arti' => 'required|array|min:1',
+            'detail_voice' => 'required|array|min:1',
+            'detail_kanji.*' => 'required|string|max:255',
+            'detail_arti.*' => 'required|string|max:255',
+            'detail_voice.*' => 'required|file|mimes:mp3,wav|max:2048', // 2MB max
         ]);
 
-        $levelMapping = [
-            'N5' => 1,
-            'N4' => 2
-        ];
+        // Start transaction
+        DB::beginTransaction();
 
-        $kamus = Kamus::create([
-            'judul' => $request->judul,
-            'nama' => $request->nama,
-            'baca' => $request->baca,
-            'level_id' => $levelMapping[$request->level_id],
-        ]);
+        try {
+            $levelMapping = [
+                'N5' => 2,
+                'N4' => 3
+            ];
 
-        foreach ($request->detail_kanji as $i => $kalimat) {
-            DetailKamus::create([
-                'kamus_id' => $kamus->id,
-                'kanji' => $kalimat, // Sesuai dengan kolom di database
-                'arti' => $request->detail_arti[$i], // Sesuai dengan kolom di database
-                'voice_record' => $request->file('detail_voice')[$i]->store('assets/voice/'),
+            // Create main Kamus record
+            $kamus = Kamus::create([
+                'judul' => $request->judul,
+                'nama' => $request->nama,
+                'baca' => $request->baca,
+                'level_id' => $levelMapping[$request->level_id],
             ]);
-        }
 
-        return redirect()->route('kamus')->with('success', 'Data kamus berhasil disimpan.');
+            // Create detail records
+            foreach ($request->detail_kanji as $i => $kalimat) {
+                DetailKamus::create([
+                    'kamus_id' => $kamus->id,
+                    'kanji' => $kalimat,
+                    'arti' => $request->detail_arti[$i],
+                    'voice_record' => $request->file('detail_voice')[$i]->store('assets/voice'),
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('kamus')->with('success_adding', 'Data kamus berhasil disimpan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
+        }
     }
 
     // AdminController.php
 
     public function kamusUpdate(Request $request, $id)
     {
-        $kamus = Kamus::findOrFail($id);
+        DB::beginTransaction();
+        try {
+            $kamus = Kamus::findOrFail($id);
 
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'nama' => 'required|string|max:255',
-            'baca' => 'required|string|max:255',
-            'level_id' => 'required|string|max:255',
-        ]);
+            $request->validate([
+                'judul' => 'required|string|max:255',
+                'nama' => 'required|string|max:255',
+                'baca' => 'required|string|max:255',
+                'level_id' => 'required|exists:levels,id', // Ubah validasi untuk memeriksa ID level
+                'detail_id' => 'required|array',
+                'detail_kanji' => 'required|array',
+                'detail_arti' => 'required|array',
+                'detail_kanji.*' => 'required|string|max:255',
+                'detail_arti.*' => 'required|string|max:255',
+                'detail_voice' => 'nullable|array',
+                'detail_voice.*' => 'nullable|file|mimes:mp3,wav|max:2048',
+                'existing_voice' => 'nullable|array',
+                'existing_voice.*' => 'nullable|string',
+            ]);
 
-        $level = Level::where('level_name', $request->level_id)->first();
-        if (!$level) {
-            return back()->with('error', 'Level tidak ditemukan.');
+            // Update data utama kamus
+            $kamus->update([
+                'judul' => $request->judul,
+                'nama' => $request->nama,
+                'baca' => $request->baca,
+                'level_id' => $request->level_id, // Langsung gunakan level_id dari request
+            ]);
+
+            $detailIdsToKeep = [];
+
+            // Update atau buat detail kamus
+            foreach ($request->detail_id as $index => $detailId) {
+                $detailData = [
+                    'kanji' => $request->detail_kanji[$index],
+                    'arti' => $request->detail_arti[$index],
+                ];
+
+                // Handle file upload
+                if (isset($request->detail_voice[$index])) {
+                    $detailData['voice_record'] = $request->file('detail_voice')[$index]->store('assets/voice');
+                } elseif (isset($request->existing_voice[$index])) {
+                    $detailData['voice_record'] = $request->existing_voice[$index];
+                }
+
+                if ($detailId === 'new') {
+                    $detail = $kamus->detailKamuses()->create($detailData);
+                    $detailIdsToKeep[] = $detail->id;
+                } else {
+                    $detail = DetailKamus::where('id', $detailId)
+                        ->where('kamus_id', $kamus->id)
+                        ->firstOrFail();
+
+                    $detail->update($detailData);
+                    $detailIdsToKeep[] = $detail->id;
+                }
+            }
+
+            // Hapus detail yang tidak ada dalam request
+            $kamus->detailKamuses()
+                ->whereNotIn('id', $detailIdsToKeep)
+                ->delete();
+
+            DB::commit();
+            return redirect()->route('kamus')->with('success_update', 'Data kamus berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage())->withInput();
         }
-
-        $kamus->update([
-            'judul' => $request->judul,
-            'nama' => $request->nama,
-            'baca' => $request->baca,
-            'level_id' => $level->id,
-        ]);
-
-        return redirect()->route('kamus')->with('success', 'Data kamus berhasil diperbarui.');
     }
 
     public function kamusDelete($id)
@@ -249,7 +320,7 @@ class adminController extends Controller
 
             $kamus->delete();
 
-            return redirect()->route('kamus')->with('success', 'Data kamus berhasil dihapus.');
+            return redirect()->route('kamus')->with('success_delete', 'Data kamus berhasil dihapus.');
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus data kamus: ' . $e->getMessage());
@@ -258,7 +329,7 @@ class adminController extends Controller
 
     public function kanji()
     {
-        $data = Kanji::all();
+        $data = Kanji::with('detailKanji')->get();
         return view('admin.kanji', compact('data'));
     }
 
@@ -269,7 +340,6 @@ class adminController extends Controller
 
     public function kanjiStore(Request $request)
     {
-        // Validasi input
         $validatorResult = $request->validate([
             'judul' => 'required|string|max:255',
             'nama' => 'required|string|max:255',
@@ -284,12 +354,17 @@ class adminController extends Controller
             'detail_voice' => 'required|array',
         ]);
 
-        $level = Level::where('level_name', $request->level_id)->first();
+        $level = Level::find($request->level_id);
         if (!$level) {
-            return back()->with('error', 'Level tidak ditemukan.');
+            return back()->with('error', 'Level tidak ditemukan.')->withInput();
         }
 
-
+        // Simpan file utama dengan nama asli
+        $voiceRecord = $request->file('voice_record');
+        $voiceRecordPath = $voiceRecord->storeAs(
+            'public/assets/voice',
+            $voiceRecord->getClientOriginalName()
+        );
 
         $kanji = Kanji::create([
             'judul' => $request->judul,
@@ -298,44 +373,78 @@ class adminController extends Controller
             'onyomi' => $request->onyomi,
             'kategori' => $request->kategori,
             'level_id' => $level->id,
-            'voice_record' => $request->file('voice_record')->store('assets/voice/'),
+            'voice_record' => str_replace('public/', '', $voiceRecordPath),
         ]);
 
         // Simpan Detail Kanji
         foreach ($request->detail_kanji as $i => $kanjiDetail) {
+            $detailVoice = $request->file('detail_voice')[$i];
+            $detailVoicePath = $detailVoice->storeAs(
+                'public/assets/voice',
+                $detailVoice->getClientOriginalName()
+            );
+
             DetailKanji::create([
                 'kanji_id' => $kanji->id,
                 'kanji' => $kanjiDetail,
                 'romaji' => $request->detail_romaji[$i],
                 'arti' => $request->detail_arti[$i],
-                'voice_record' => $request->file('detail_voice')[$i]->store('assets/voice/'), // Simpan file detail
+                'voice_record' => str_replace('public/', '', $detailVoicePath),
             ]);
         }
 
-        return redirect()->route('kanji')->with('success', 'Kanji berhasil ditambahkan.');
+        return redirect()->route('kanji')->with('success_adding', 'Data kanji berhasil ditambahkan!');
     }
 
     public function kanjiUpdate(Request $request, $id)
     {
-        $kanji = Kanji::findOrFail($id);
+        DB::beginTransaction();
+        try {
+            // Validasi data utama
+            $validated = $request->validate([
+                'judul' => 'required|string|max:255',
+                'nama' => 'required|string|max:255',
+                'kunyomi' => 'required|string|max:255',
+                'onyomi' => 'required|string|max:255',
+                'kategori' => 'required|string|in:tandoku,okurigana,jukugo',
+                'detail_id' => 'sometimes|array',
+                'detail_kanji' => 'sometimes|array',
+                'detail_arti' => 'sometimes|array',
+                'detail_romaji' => 'sometimes|array',
+                'detail_voice_record' => 'sometimes|array'
+            ]);
 
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'nama' => 'required|string|max:255',
-            'kunyomi' => 'required|string|max:255',
-            'onyomi' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255',
-        ]);
+            // Update data utama kanji
+            $kanji = Kanji::findOrFail($id);
+            $kanji->update($validated);
 
-        $kanji->update([
-            'judul' => $request->judul,
-            'nama' => $request->nama,
-            'kunyomi' => $request->kunyomi,
-            'onyomi' => $request->onyomi,
-            'kategori' => $request->kategori,
-        ]);
+            // Proses update detail yang ada saja
+            if ($request->has('detail_id')) {
+                foreach ($request->detail_id as $index => $detailId) {
+                    $detailData = [
+                        'kanji' => $request->detail_kanji[$index],
+                        'arti' => $request->detail_arti[$index],
+                        'romaji' => $request->detail_romaji[$index],
+                        'voice_record' => $request->detail_voice_record[$index] ?? null
+                    ];
 
-        return redirect()->route('kanji')->with('success', 'Data kanji berhasil diperbarui.');
+                    $detail = DetailKanji::where('id', $detailId)
+                        ->where('kanji_id', $kanji->id)
+                        ->first();
+
+                    if ($detail) {
+                        $detail->update($detailData);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('kanji')->with('success_update', 'Data kanji berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui data kanji: ' . $e->getMessage());
+        }
     }
 
     public function kanjiDelete($id)
@@ -349,10 +458,8 @@ class adminController extends Controller
 
         $kanji->delete();
 
-        return redirect()->route('kanji')->with('success', 'Data kanji berhasil dihapus.');
+        return redirect()->route('kanji')->with('success_delete', 'Data kanji berhasil dihapus!');
     }
-
-
 
     public function ujian()
     {
@@ -416,7 +523,7 @@ class adminController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujian')->with('success', 'Ujian berhasil dibuat!');
+            return redirect()->route('ujian')->with('success_adding', 'Ujian berhasil dibuat!');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -444,7 +551,7 @@ class adminController extends Controller
                 'level_id' => $request->level_id
             ]);
 
-            return redirect()->route('ujian')->with('success', 'Data ujian berhasil diperbarui.');
+            return redirect()->route('ujian')->with('success_update', 'Data ujian berhasil diperbarui.');
 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -466,7 +573,7 @@ class adminController extends Controller
 
             DB::commit();
 
-            return redirect()->route('ujian')->with('success', 'Data ujian berhasil dihapus.');
+            return redirect()->route('ujian')->with('success_delete', 'Data ujian berhasil dihapus.');
 
         } catch (\Exception $e) {
             DB::rollBack();

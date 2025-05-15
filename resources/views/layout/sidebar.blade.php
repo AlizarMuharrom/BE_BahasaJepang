@@ -2,11 +2,11 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+        <div class="sidebar-brand-text mx-1">Benkyou Admin</div>
     </a>
 
     <!-- Divider -->
@@ -77,15 +77,16 @@
         Akun
     </div>
     <li class="nav-item">
-        <form id="logout-form" action="{{ route('logout') }}" method="POST">
+        <a class="nav-link" href="#" onclick="confirmLogout(event)">
+            <i class="fas fa-fw fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </a>
+
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
-            <a class="nav-link" href="#"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="fas fa-fw fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
         </form>
     </li>
+
 
     <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
@@ -94,3 +95,23 @@
 
 </ul>
 <!-- End of Sidebar -->
+
+<script>
+    function confirmLogout(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Yakin ingin logout?',
+            text: "Sesi kamu akan diakhiri.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, logout',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logout-form').submit();
+            }
+        });
+    }
+</script>

@@ -39,18 +39,23 @@
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                     </div>
-                                    <form action="{{ route('loginProses') }}" class="user" method="post">
+                                    <form action="{{ route('loginProses') }}" class="user" method="post"
+                                        autocomplete="off">
                                         @csrf
                                         <div class="form-group">
                                             <input type="email" name="email" class="form-control form-control-user"
-                                                id="exampleInputEmail" aria-describedby="emailHelp"
-                                                placeholder="Enter Email Address...">
+                                                id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Email"
+                                                autocomplete="off">
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group position-relative">
                                             <input type="password" name="password"
                                                 class="form-control form-control-user" id="exampleInputPassword"
-                                                placeholder="Password">
+                                                placeholder="Password" autocomplete="new-password">
+                                            <span toggle="#exampleInputPassword"
+                                                class="fa fa-fw fa-eye field-icon toggle-password"
+                                                style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer;"></span>
                                         </div>
+
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
                                                 <input type="checkbox" class="custom-control-input" id="customCheck">
@@ -90,20 +95,30 @@
             Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "Email atau Password salah!",
+                text: "{{ $message }}",
             });
         </script>
     @endif
-    <!-- Tambahkan ini setelah script SweetAlert untuk pesan error sebelumnya -->
     @if ($message = Session::get('not_admin'))
         <script>
             Swal.fire({
                 icon: "error",
                 title: "Akses Ditolak",
-                text: "Anda bukan admin!",
+                text: "{{ $message }}",
             });
         </script>
     @endif
+
+    <script>
+        $(document).ready(function () {
+            $(".toggle-password").click(function () {
+                const input = $($(this).attr("toggle"));
+                const type = input.attr("type") === "password" ? "text" : "password";
+                input.attr("type", type);
+                $(this).toggleClass("fa-eye fa-eye-slash");
+            });
+        });
+    </script>
 
     @if (session('success'))
         <script>

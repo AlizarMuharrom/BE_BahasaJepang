@@ -9,7 +9,7 @@ class MateriController extends Controller
 {
     public function index()
     {
-        $materis = Materi::with('detailMateris')->get();
+        $materis = Materi::with('detail_materis')->get();
         return response()->json($materis);
     }
 
@@ -26,19 +26,19 @@ class MateriController extends Controller
 
         if ($request->has('detail_materis')) {
             foreach ($request->detail_materis as $detail) {
-                $materi->detailMateris()->create([
+                $materi->detail_materis()->create([
                     'judul' => $detail['judul'],
                     'isi' => $detail['isi']
                 ]);
             }
         }
 
-        return response()->json($materi->load('detailMateris'), 201);
+        return response()->json($materi->load('detail_materis'), 201);
     }
 
     public function show($id)
     {
-        $materi = Materi::with('detailMateris')->findOrFail($id);
+        $materi = Materi::with('detail_materis')->findOrFail($id);
         return response()->json($materi);
     }
 
@@ -55,16 +55,16 @@ class MateriController extends Controller
         $materi->update($request->only('judul'));
 
         if ($request->has('detail_materis')) {
-            $materi->detailMateris()->delete();
+            $materi->detail_materis()->delete();
             foreach ($request->detail_materis as $detail) {
-                $materi->detailMateris()->create([
+                $materi->detail_materis()->create([
                     'judul' => $detail['judul'],
                     'isi' => $detail['isi']
                 ]);
             }
         }
 
-        return response()->json($materi->load('detailMateris'));
+        return response()->json($materi->load('detail_materis'));
     }
 
     public function destroy($id)
