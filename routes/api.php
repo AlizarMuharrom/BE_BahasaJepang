@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\LevelController1;
+use App\Http\Controllers\ForgotPassword;
 use App\Http\Controllers\KamusController;
 use App\Http\Controllers\KanjiController;
 use App\Http\Controllers\LoginController;
@@ -57,3 +58,8 @@ Route::get('hasil-ujian/user/{userId}', [UjianController::class, 'getHasilByUser
     ->middleware('auth:sanctum');
 
 Route::get('user/hasil-ujian', [UjianController::class, 'userHistory'])->middleware('auth:sanctum');
+
+Route::post('/forgot-password', [ForgotPassword::class, 'forgotPassword']);
+Route::post('/verify-token', [ForgotPassword::class, 'verifyToken']);
+Route::post('/reset-password', [ForgotPassword::class, 'resetPassword']);
+Route::get('send-mail', [ForgotPassword::class, 'forgotPassword']);
