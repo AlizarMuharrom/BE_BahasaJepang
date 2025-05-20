@@ -31,32 +31,17 @@ class ForgotPassword extends Controller
         }
 
         try {
-            // // Generate token (contoh sederhana)
-            $token = Str::random(6); // atau gunakan random_int untuk angka
-
-            // // Simpan token ke database (contoh tabel password_resets)
+            $token = Str::random(6);
             DB::table('password_reset_tokens')->updateOrInsert(
                 ['email' => $request->email],
                 ['token' => $token, 'created_at' => now()]
             );
 
-            $mailData = [
-                'title' => 'Token untuk reset password',
-                'body' => 'Gunakan token ini untuk mereset password anda'
-            ];
-
-
-            // // Jika ingin mengirim email:
-            Mail::to($request->email)->send(new TestMail($mailData));
-
-            dd('Token berhasil terkirim');
+            Mail::to($request->email)->send(new TestMail($token));
 
             return response()->json([
                 'success' => true,
-                'message' => 'Token reset password telah dikirim',
-                'data' => [
-                    'token' => $token,// Opsional: hanya untuk development
-                ]
+                'message' => 'Token reset password telah dikirim ke email Anda.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
