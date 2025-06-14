@@ -59,6 +59,12 @@
     </li>
 
     <li class="nav-item">
+        <a class="nav-link" href="{{ route('materiN5N4') }}">
+            <i class="fas fa-fw fa-file-alt"></i>
+            <span>Data Materi N5 N4</span></a>
+    </li>
+
+    <li class="nav-item">
         <a class="nav-link" href="{{ route('ujian') }}">
             <i class="fas fa-fw fa-clipboard-check"></i>
             <span>Data Ujian</span></a>

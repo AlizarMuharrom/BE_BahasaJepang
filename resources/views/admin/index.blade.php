@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Login</title>
+    <title>Benkyou</title>
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('assetAdmin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -67,9 +67,6 @@
                                         <hr>
                                     </form>
                                     <hr>
-                                    <div class="text-center">
-                                        <a class="small" href="forgot-password.html">Forgot Password?</a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -116,6 +113,17 @@
                 const type = input.attr("type") === "password" ? "text" : "password";
                 input.attr("type", type);
                 $(this).toggleClass("fa-eye fa-eye-slash");
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('showLoginInfo').addEventListener('click', function () {
+            Swal.fire({
+                title: 'Informasi Login Admin',
+                html: '<b>Email:</b> admin@example.com<br><b>Password:</b> admin123',
+                icon: 'info',
+                confirmButtonText: 'Tutup'
             });
         });
     </script>

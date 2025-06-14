@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\DetailKamus;
 use App\Models\DetailKanji;
 use App\Models\DetailMateri;
+use App\Models\DetailMateriN5N4;
 use App\Models\DetailUjian;
 use App\Models\Kamus;
 use App\Models\Kanji;
 use App\Models\Level;
 use App\Models\Materi;
+use App\Models\MateriN5N4;
 use App\Models\Ujian;
 use App\Models\User;
 use Hash;
@@ -171,6 +173,120 @@ class adminController extends Controller
         }
     }
 
+    public function materiN5N4()
+    {
+        $data = MateriN5N4::with('details')->get();
+        $levels = Level::whereIn('id', [2, 3])->get();
+        return view('admin.materiN5N4', compact('data', 'levels'));
+    }
+
+    public function tambahMateriN5N4()
+    {
+        $levels = Level::whereIn('id', [2, 3])->get(); // Asumsi ID 2=N5, 3=N4
+        return view('admin.tambah.tambahMateriN5N4', compact('levels'));
+    }
+
+    public function materiN5N4Store(Request $request)
+    {
+        $validated = $request->validate([
+            'judul_materi' => 'required|string|max:255',
+            'judul_detail' => 'required|array|min:1',
+            'judul_detail.*' => 'required|string|max:255',
+            'isi_detail' => 'required|array|min:1',
+            'isi_detail.*' => 'required|string',
+            'level_id' => 'required|exists:levels,id' // Pastikan level_id ada di tabel levels
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $materi = MateriN5N4::create([
+                'judul' => $validated['judul_materi'],
+                'level_id' => $validated['level_id']
+            ]);
+
+            foreach ($validated['judul_detail'] as $index => $judul) {
+                DetailMateriN5N4::create([
+                    'materi_n5_n4_id' => $materi->id,
+                    'judul' => $judul,
+                    'isi' => $validated['isi_detail'][$index]
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('materiN5N4')->with('success', 'Materi N5/N4 berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menyimpan materi: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function materiN5N4Update(Request $request, $id)
+    {
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'level_id' => 'required|exists:levels,id',
+            'detail_judul.*' => 'required|string|max:255',
+            'detail_isi.*' => 'required|string',
+            'detail_id.*' => 'sometimes|exists:materi_n5_n4_detail,id' // Untuk update detail yang sudah ada
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $materi = MateriN5N4::findOrFail($id);
+            $materi->update([
+                'judul' => $request->judul,
+                'level_id' => $request->level_id
+            ]);
+
+            // Update existing details
+            if ($request->has('detail_id')) {
+                foreach ($request->detail_id as $key => $detailId) {
+                    $detail = DetailMateriN5N4::findOrFail($detailId);
+                    $detail->update([
+                        'judul' => $request->detail_judul[$key],
+                        'isi' => $request->detail_isi[$key]
+                    ]);
+                }
+            }
+
+            // Add new details
+            if ($request->has('new_detail_judul')) {
+                foreach ($request->new_detail_judul as $index => $judul) {
+                    DetailMateriN5N4::create([
+                        'materi_n5_n4_id' => $materi->id,
+                        'judul' => $judul,
+                        'isi' => $request->new_detail_isi[$index]
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('materiN5N4')->with('success', 'Materi N5/N4 berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui materi: ' . $e->getMessage());
+        }
+    }
+
+    public function materiN5N4Delete($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $materi = MateriN5N4::findOrFail($id);
+            $materi->details()->delete(); // Sesuai nama relasi 'details'
+            $materi->delete();
+
+            DB::commit();
+            return redirect()->route('materiN5N4')->with('success', 'Materi N5/N4 berhasil dihapus!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menghapus materi: ' . $e->getMessage());
+        }
+    }
+
     public function kamus()
     {
         $data = Kamus::with(['detailKamuses', 'level'])->get();
@@ -184,56 +300,66 @@ class adminController extends Controller
     }
 
     public function kamusStore(Request $request)
-    {
-        // Add proper validation
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'nama' => 'required|string|max:255',
-            'baca' => 'required|string|max:255',
-            'level_id' => 'required|string|in:N5,N4', // Ensure only these values
-            'detail_kanji' => 'required|array|min:1',
-            'detail_arti' => 'required|array|min:1',
-            'detail_voice' => 'required|array|min:1',
-            'detail_kanji.*' => 'required|string|max:255',
-            'detail_arti.*' => 'required|string|max:255',
-            'detail_voice.*' => 'required|file|mimes:mp3,wav|max:2048', // 2MB max
+{
+    // Add proper validation
+    $validated = $request->validate([
+        'judul' => 'required|string|max:255',
+        'nama' => 'required|string|max:255',
+        'baca' => 'required|string|max:255',
+        'level_id' => 'required|string|in:N5,N4', // Ensure only these values
+        'detail_kanji' => 'required|array|min:1',
+        'detail_arti' => 'required|array|min:1',
+        'detail_voice' => 'required|array|min:1',
+        'detail_kanji.*' => 'required|string|max:255',
+        'detail_arti.*' => 'required|string|max:255',
+        'detail_voice.*' => 'required|file|mimes:mp3,wav|max:2048', // 2MB max
+    ]);
+
+    // Start transaction
+    DB::beginTransaction();
+
+    try {
+        $levelMapping = [
+            'N5' => 2,
+            'N4' => 3
+        ];
+
+        // Create main Kamus record
+        $kamus = Kamus::create([
+            'judul' => $request->judul,
+            'nama' => $request->nama,
+            'baca' => $request->baca,
+            'level_id' => $levelMapping[$request->level_id],
         ]);
 
-        // Start transaction
-        DB::beginTransaction();
+        // Create detail records
+        foreach ($request->detail_kanji as $i => $kalimat) {
+            $voiceFile = $request->file('detail_voice')[$i];
+            
+            // Get original file name with extension
+            $originalName = pathinfo($voiceFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $voiceFile->getClientOriginalExtension();
+            $fileName = $originalName . '.' . $extension;
+            
+            // Store file with original name in 'assets/voice' directory
+            $path = $voiceFile->storeAs('assets/voice', $fileName);
 
-        try {
-            $levelMapping = [
-                'N5' => 2,
-                'N4' => 3
-            ];
-
-            // Create main Kamus record
-            $kamus = Kamus::create([
-                'judul' => $request->judul,
-                'nama' => $request->nama,
-                'baca' => $request->baca,
-                'level_id' => $levelMapping[$request->level_id],
+            DetailKamus::create([
+                'kamus_id' => $kamus->id,
+                'kanji' => $kalimat,
+                'arti' => $request->detail_arti[$i],
+                'voice_record' => $path,
             ]);
-
-            // Create detail records
-            foreach ($request->detail_kanji as $i => $kalimat) {
-                DetailKamus::create([
-                    'kamus_id' => $kamus->id,
-                    'kanji' => $kalimat,
-                    'arti' => $request->detail_arti[$i],
-                    'voice_record' => $request->file('detail_voice')[$i]->store('assets/voice'),
-                ]);
-            }
-
-            DB::commit();
-            return redirect()->route('kamus')->with('success_adding', 'Data kamus berhasil disimpan.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
         }
+
+        DB::commit();
+        return redirect()->route('kamus')->with('success_adding', 'Data kamus berhasil disimpan.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
     }
+}
 
     // AdminController.php
 
@@ -532,33 +658,44 @@ class adminController extends Controller
     }
 
     public function ujianUpdate(Request $request, $id)
-    {
-        // Validasi input
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'jumlah_soal' => 'required|integer|min:1',
-            'level_id' => 'required|integer|in:1,2,3' // 1=Pemula, 2=N5, 3=N4
+{
+    $request->validate([
+        'judul' => 'required|string|max:255',
+        'jumlah_soal' => 'required|integer|min:1',
+        'level_id' => 'required|integer|in:1,2,3',
+        'questions' => 'required|array'
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        // Update exam data
+        $ujian = Ujian::findOrFail($id);
+        $ujian->update([
+            'judul' => $request->judul,
+            'jumlah_soal' => $request->jumlah_soal,
+            'level_id' => $request->level_id
         ]);
 
-        try {
-            // Temukan data ujian yang akan diupdate
-            $ujian = Ujian::findOrFail($id);
-
-            // Update data ujian
-            $ujian->update([
-                'judul' => $request->judul,
-                'jumlah_soal' => $request->jumlah_soal,
-                'level_id' => $request->level_id
+        // Update questions
+        foreach ($request->questions as $questionId => $questionData) {
+            $question = DetailUjian::findOrFail($questionId);
+            
+            $question->update([
+                'soal' => $questionData['soal'],
+                'pilihan_jawaban' => json_encode($questionData['pilihan']),
+                'jawaban_benar' => $questionData['jawaban_benar']
             ]);
-
-            return redirect()->route('ujian')->with('success_update', 'Data ujian berhasil diperbarui.');
-
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal memperbarui data ujian: ' . $e->getMessage())
-                ->withInput();
         }
+
+        DB::commit();
+        return redirect()->route('ujian')->with('success_update', 'Data ujian berhasil diperbarui.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage())->withInput();
     }
+}
 
     public function ujianDelete($id)
     {

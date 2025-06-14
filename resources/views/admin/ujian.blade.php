@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Str;
+@endphp
+
 @extends('layout.app')
 @section('content')
     <div class="container-fluid">
@@ -145,10 +149,10 @@
             </div>
         </div>
 
-        <!-- Modal Edit -->
+        <!-- Modal Edit (diperbarui) -->
         <div class="modal fade" id="editModal{{ $d->id }}" tabindex="-1" role="dialog"
              aria-labelledby="editModalLabel{{ $d->id }}" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <form action="{{ route('ujianUpdate', $d->id) }}" method="POST">
                     @csrf
                     @method('PATCH')
@@ -165,29 +169,77 @@
                                 <input type="text" name="judul" class="form-control"
                                     value="{{ $d->judul }}" required>
                             </div>
-                            <div class="form-group">
-                                <label>Jumlah Soal</label>
-                                <input type="number" name="jumlah_soal" class="form-control"
-                                    value="{{ $d->jumlah_soal }}" required>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Jumlah Soal</label>
+                                        <input type="number" name="jumlah_soal" class="form-control"
+                                            value="{{ $d->jumlah_soal }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Level</label>
+                                        <select name="level_id" class="form-control" required>
+                                            <option value="1" {{ $d->level_id == 1 ? 'selected' : '' }}>Pemula</option>
+                                            <option value="2" {{ $d->level_id == 2 ? 'selected' : '' }}>N5</option>
+                                            <option value="3" {{ $d->level_id == 3 ? 'selected' : '' }}>N4</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Level</label>
-                                <select name="level_id" class="form-control" required>
-                                    <option value="1" {{ $d->level_id == 1 ? 'selected' : '' }}>Pemula</option>
-                                    <option value="2" {{ $d->level_id == 2 ? 'selected' : '' }}>N5</option>
-                                    <option value="3" {{ $d->level_id == 3 ? 'selected' : '' }}>N4</option>
-                                </select>
+
+                            <hr>
+                            <h5>Edit Soal</h5>
+                            <div class="questions-container" style="max-height: 400px; overflow-y: auto;">
+                                @foreach($d->questions as $index => $question)
+                                <div class="card mb-3 question-item">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label>Soal {{ $index + 1 }}</label>
+                                            <textarea name="questions[{{ $question->id }}][soal]" 
+                                                class="form-control" rows="2" required>{{ $question->soal }}</textarea>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>Pilihan Jawaban</label>
+                                            @foreach(json_decode($question->pilihan_jawaban, true) as $key => $value)
+                                            <div class="input-group mb-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">{{ $key }}</span>
+                                                </div>
+                                                <input type="text" 
+                                                    name="questions[{{ $question->id }}][pilihan][{{ $key }}]" 
+                                                    class="form-control" value="{{ $value }}" required>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>Jawaban Benar</label>
+                                            <select name="questions[{{ $question->id }}][jawaban_benar]" 
+                                                class="form-control" required>
+                                                @foreach(json_decode($question->pilihan_jawaban, true) as $key => $value)
+                                                <option value="{{ $key }}" {{ $question->jawaban_benar == $key ? 'selected' : '' }}>
+                                                    {{ $key }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                            <button type="submit" class="btn btn-primary">Simpan Semua Perubahan</button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-
         <!-- Modal Delete -->
         <div class="modal fade" id="deleteModal{{ $d->id }}" tabindex="-1" role="dialog"
              aria-labelledby="deleteModalLabel{{ $d->id }}" aria-hidden="true">
@@ -231,6 +283,6 @@
             @if(session('success_adding'))
                 alert('{{ session('success_adding') }}');
             @endif
-                });
+        });
     </script>
 @endpush

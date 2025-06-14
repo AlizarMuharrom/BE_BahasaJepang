@@ -16,11 +16,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [AdminController::class, 'home'])->name('dashboard');
     Route::get('/materi', [AdminController::class, 'materi'])->name('materi');
+    Route::get('/materiN5N4', [AdminController::class, 'materiN5N4'])->name('materiN5N4');
     Route::get('/kamus', [AdminController::class, 'kamus'])->name('kamus');
     Route::get('/kanji', [AdminController::class, 'kanji'])->name('kanji');
     Route::get('/ujian', [AdminController::class, 'ujian'])->name('ujian');
     Route::get('/user', [AdminController::class, 'user'])->name('user');
     Route::get('/tambahMateri', [AdminController::class, 'tambahMateri'])->name('tambahMateri');
+    Route::get('/tambahMateriN5N4', [AdminController::class, 'tambahMateriN5N4'])->name('tambahMateriN5N4');
     Route::get('/tambahKanji', [AdminController::class, 'tambahKanji'])->name('tambahKanji');
     Route::get('/tambahKamus', [AdminController::class, 'tambahKamus'])->name('tambahKamus');
     Route::get('/tambahUjian', [AdminController::class, 'tambahUjian'])->name('tambahUjian');
@@ -36,6 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::POST('/materiStore', [AdminController::class, 'materiStore'])->name('materiStore');
     Route::PATCH('/materiUpdate/{id}', [AdminController::class, 'materiUpdate'])->name('materiUpdate');
     Route::delete('/materiDelete/{id}', [AdminController::class, 'materiDelete'])->name('materiDelete');
+    Route::POST('/materiN5N4Store', [AdminController::class, 'materiN5N4Store'])->name('materiN5N4Store');
+    Route::PATCH('/materiN5N4Update/{id}', [AdminController::class, 'materiN5N4Update'])->name('materiN5N4Update');
+    Route::delete('/materiN5N4Delete/{id}', [AdminController::class, 'materiN5N4Delete'])->name('materiN5N4Delete');
 });
 
 
